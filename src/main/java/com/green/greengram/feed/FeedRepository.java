@@ -12,15 +12,23 @@ import java.util.Optional;
 
 @Repository
 public interface FeedRepository extends JpaRepository<Feed, Long> {
+    //쿼리 메소드
     Optional<Feed> findByFeedIdAndWriterUser(Long feedId, User writerUser);
 
     //쿼리 메소드로 delete, update는 비추천
     int deleteByFeedIdAndWriterUser(Long feedId, User writerUser);
 
     //JPQL (Java Persistence Query Language)
-    @Modifying //이 애노테이션이 있어야 delete or update JPQL, 리턴타입은 void or int
+    @Modifying //이 애노테이션이 있어야 delete or update JPQL, 리턴타입은 void or int <-- 이거 생략하면 무조건 select
     @Query("delete from Feed f where f.feedId=:feedId AND f.writerUser.userId=:writerUserId")
     int deleteFeed(Long feedId, Long writerUserId);
+
+    @Modifying
+    @Query(value = "delete from Feed f where f.feedId=:feedId AND f.writerUser.userId=:writerUserId", nativeQuery = true)
+    int deleteFeedSql(Long feedId, Long writerUserId);
+
+    //객체지향언어의 장점 - 유지보수성(refactoring)   
+
     /*
     Feed (대문자로 시작) - 클래스명 작성해야 함
 

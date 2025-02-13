@@ -13,7 +13,6 @@ import static com.green.greengram.config.security.SignInProviderType.KAKAO;
     HashMap을 이용한 규격화된 객체로 파싱
  */
 
-
 @Component
 public class Oauth2UserInfoFactory {
     public Oauth2UserInfo getOauth2UserInfo(SignInProviderType signInProviderType, Map<String, Object> attributes) {

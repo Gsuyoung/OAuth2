@@ -1,12 +1,13 @@
 package com.green.greengram.config.jwt;
 
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
+
 import java.util.List;
 
 @Setter
 @Getter
+@AllArgsConstructor //모든 파라미터가 있는 생성자
+@NoArgsConstructor //기본 생성자
 @EqualsAndHashCode //Equals, HashCode 메소드 오버라이딩
 public class JwtUser {
     private long signedUserId;

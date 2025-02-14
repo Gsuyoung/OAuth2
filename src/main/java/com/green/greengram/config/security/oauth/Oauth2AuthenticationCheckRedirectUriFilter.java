@@ -1,4 +1,4 @@
-package com.green.greengram.config.security;
+package com.green.greengram.config.security.oauth;
 
 import com.green.greengram.common.GlobalOauth2;
 import jakarta.servlet.FilterChain;

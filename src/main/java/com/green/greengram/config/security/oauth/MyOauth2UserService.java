@@ -19,6 +19,7 @@ import org.springframework.stereotype.Service;
 
 
 import java.util.ArrayList;
+import java.util.Arrays;
 
 @Slf4j
 @Service
@@ -63,13 +64,19 @@ public class MyOauth2UserService extends DefaultOAuth2UserService { //자식(MyO
             user.setPic(oauth2UserInfo.getProfileImageUrl());
             userRepository.save(user);
         }
-        JwtUser jwtUser = new JwtUser();
-        jwtUser.setSignedUserId(user.getUserId());
-        jwtUser.setRoles(new ArrayList<>(1));
-        jwtUser.getRoles().add("ROLE_USER");
+
+        OAuth2JwtUser oAuth2JwtUser = new OAuth2JwtUser(user.getNickName()
+                                                      , user.getPic()
+                                                      , user.getUserId()
+                                                      , Arrays.asList("ROLE_USER"));
+
+//        JwtUser jwtUser = new JwtUser();
+//        jwtUser.setSignedUserId(user.getUserId());
+//        jwtUser.setRoles(new ArrayList<>(1));
+//        jwtUser.getRoles().add("ROLE_USER");
 
         MyUserDetails myUserDetails = new MyUserDetails();
-        myUserDetails.setJwtUser(jwtUser);
+        myUserDetails.setJwtUser(oAuth2JwtUser);
 
         return myUserDetails;
     }

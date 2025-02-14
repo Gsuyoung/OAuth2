@@ -1,9 +1,11 @@
 package com.green.greengram.config.security;
 
 //Spring Security 세팅
+import com.green.greengram.common.GlobalOauth2;
 import com.green.greengram.config.jwt.JwtAuthenticationEntryPoint;
 import com.green.greengram.config.jwt.TokenAuthenticationFilter;
 import com.green.greengram.config.jwt.TokenProvider;
+import com.green.greengram.config.security.oauth.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -20,6 +22,12 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class WebSecurityConfig {
     private final TokenProvider tokenProvider;
     private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
+    private final Oauth2AuthenticationCheckRedirectUriFilter oauth2AuthenticationCheckRedirectUriFilter;
+    private final Oauth2AuthenticationFailureHandler oauth2AuthenticationFailureHandler;
+    private final Oauth2AuthenticationSuccessHandler oauth2AuthenticationSuccessHandler;
+    private final Oauth2AuthenticationRequestBasedOnCookieRepository repository;
+    private final MyOauth2UserService myOauth2UserService;
+    private final GlobalOauth2 globalOauth2;
 
     //스프링 시큐리티 기능 비활성화 (스프링 시큐리티가 관여하지 않았으면 하는 부분)
 //    @Bean
@@ -42,6 +50,13 @@ public class WebSecurityConfig {
                 )
                 .exceptionHandling(e -> e.authenticationEntryPoint(jwtAuthenticationEntryPoint))
                 .addFilterBefore(new TokenAuthenticationFilter(tokenProvider), UsernamePasswordAuthenticationFilter.class)
+                .oauth2Login(oauth2 -> oauth2.authorizationEndpoint(auth -> auth.baseUri(globalOauth2.getBaseUri())
+                                                                                .authorizationRequestRepository(repository))
+                                            .redirectionEndpoint(redirection -> redirection.baseUri("/*/oauth2/code/*")) //BE가 사용하는 redirectUri이다. 플랫폼마다 사용할 예정
+                                            .userInfoEndpoint(userInfo -> userInfo.userService(myOauth2UserService))
+                                            .successHandler(oauth2AuthenticationSuccessHandler)
+                                            .failureHandler(oauth2AuthenticationFailureHandler) )
+                .addFilterBefore(oauth2AuthenticationCheckRedirectUriFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();
     }
 

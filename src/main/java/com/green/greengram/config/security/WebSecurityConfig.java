@@ -14,6 +14,7 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.client.web.OAuth2AuthorizationRequestRedirectFilter;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
@@ -22,10 +23,12 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class WebSecurityConfig {
     private final TokenProvider tokenProvider;
     private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
+
+    //OAuth2
     private final Oauth2AuthenticationCheckRedirectUriFilter oauth2AuthenticationCheckRedirectUriFilter;
-    private final Oauth2AuthenticationFailureHandler oauth2AuthenticationFailureHandler;
-    private final Oauth2AuthenticationSuccessHandler oauth2AuthenticationSuccessHandler;
     private final Oauth2AuthenticationRequestBasedOnCookieRepository repository;
+    private final Oauth2AuthenticationSuccessHandler oauth2AuthenticationSuccessHandler;
+    private final Oauth2AuthenticationFailureHandler oauth2AuthenticationFailureHandler;
     private final MyOauth2UserService myOauth2UserService;
     private final GlobalOauth2 globalOauth2;
 
@@ -44,19 +47,19 @@ public class WebSecurityConfig {
                 .csrf(csrf -> csrf.disable()) //SSR(Server Side Rendering)이 아니다. 보안관련 SSR 이 아니면 보안이슈가 없기 때문에 기능을 끈다.
                 .authorizeHttpRequests(req ->
                         req.requestMatchers("/api/feed", "/api/feed/**").authenticated() //로그인이 되어 있어야만 사용 가능
-                            .requestMatchers(HttpMethod.GET,"/api/user").authenticated()
-                            .requestMatchers(HttpMethod.PATCH,"/api/user/pic").authenticated()
-                            .anyRequest().permitAll() //나머지 요청은 모두 허용
+                                .requestMatchers(HttpMethod.GET,"/api/user").authenticated()
+                                .requestMatchers(HttpMethod.PATCH,"/api/user/pic").authenticated()
+                                .anyRequest().permitAll() //나머지 요청은 모두 허용
                 )
                 .exceptionHandling(e -> e.authenticationEntryPoint(jwtAuthenticationEntryPoint))
                 .addFilterBefore(new TokenAuthenticationFilter(tokenProvider), UsernamePasswordAuthenticationFilter.class)
-                .oauth2Login(oauth2 -> oauth2.authorizationEndpoint(auth -> auth.baseUri(globalOauth2.getBaseUri())
-                                                                                .authorizationRequestRepository(repository))
-                                            .redirectionEndpoint(redirection -> redirection.baseUri("/*/oauth2/code/*")) //BE가 사용하는 redirectUri이다. 플랫폼마다 사용할 예정
-                                            .userInfoEndpoint(userInfo -> userInfo.userService(myOauth2UserService))
-                                            .successHandler(oauth2AuthenticationSuccessHandler)
-                                            .failureHandler(oauth2AuthenticationFailureHandler) )
-                .addFilterBefore(oauth2AuthenticationCheckRedirectUriFilter, UsernamePasswordAuthenticationFilter.class)
+                .oauth2Login( oauth2 -> oauth2.authorizationEndpoint( auth -> auth.baseUri( globalOauth2.getBaseUri() )
+                                .authorizationRequestRepository(repository) )
+                        .redirectionEndpoint( redirection -> redirection.baseUri("/*/oauth2/code/*") ) //BE가 사용하는 redirectUri이다. 플랫폼마다 설정을 할 예정
+                        .userInfoEndpoint( userInfo -> userInfo.userService(myOauth2UserService) )
+                        .successHandler(oauth2AuthenticationSuccessHandler)
+                        .failureHandler(oauth2AuthenticationFailureHandler) )
+                .addFilterBefore(oauth2AuthenticationCheckRedirectUriFilter, OAuth2AuthorizationRequestRedirectFilter.class)
                 .build();
     }
 

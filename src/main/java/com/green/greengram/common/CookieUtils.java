@@ -47,7 +47,7 @@ public class CookieUtils {
     //역직렬화, 문자열값을 객체로 변환
     private  <T> T deserializeCookie(Cookie cookie, Class<T> valueType) {
         return valueType.cast(
-                SerializationUtils.deserialize(Base64.getDecoder().decode(cookie.getValue()))
+                SerializationUtils.deserialize(Base64.getUrlDecoder().decode(cookie.getValue()))
         );
     }
 

@@ -2,6 +2,7 @@ package com.green.greengram.config.security.oauth;
 
 import com.green.greengram.common.CookieUtils;
 import com.green.greengram.common.GlobalOauth2;
+import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -26,15 +27,17 @@ public class Oauth2AuthenticationFailureHandler extends SimpleUrlAuthenticationF
             throws IOException{
         exception.printStackTrace();
 
-        // FE - Redirect-Url 획득 from Cookie
+        //FE - Redirect-Url 획득 from Cookie
         String redirectUrl = cookieUtils.getValue(req, globalOauth2.getRedirectUriParamCookieName(), String.class);
 
-        // URL에 에러 쿼리스트링 추가
+        //URL에 에러 쿼리스트링 추가
         String targetUrl = redirectUrl == null ? "/" : UriComponentsBuilder.fromUriString(redirectUrl)
                 .queryParam("error", exception.getLocalizedMessage())
                 .build()
                 .toUriString();
-        // targetUrl = "http://localhost:8080/fe/redirect?error=어쩌고저쩌고";
+        //targetUrl = "http://localhost:8080/fe/redirect?error=에러메세지";
         getRedirectStrategy().sendRedirect(req, res, targetUrl);
+
     }
+
 }

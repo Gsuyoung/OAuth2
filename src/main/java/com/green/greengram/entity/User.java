@@ -23,7 +23,7 @@ public class User extends UpdatedAt {
     @Column(nullable = false)
     private SignInProviderType providerType;
 
-    @Column(nullable = false, length = 30)
+    @Column(nullable = false, length = 70)
     private String uid;
 
     @Column(nullable = false, length = 100)
